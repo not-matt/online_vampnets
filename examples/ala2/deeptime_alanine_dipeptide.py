@@ -23,13 +23,23 @@ from torch.utils.data import DataLoader
 
 
 # %% [markdown]
+# # Hyperparameters
 # 
-#  validation split 30%
-#  batch size.
-#  list network arch number of elements, hidden layers, explain size of inputs and output states
-#  lagtime
+#  30% validation split
+#  10000 batch size
+#  lagtime of 1
+#  Network architecture:
+#  Input layer is 60, corresponding to the number of atomic coordinates of the heavy atoms of alanine tripeptide
+#  There are 20 heavy atoms in alanine tripeptide, and each has an X, Y, and Z coordinate, giving 60 data points total.
+#  There follows an intermediate layer 60x60, then another 60x100
+#  There are then four hidden layers shaped 100x100
+#  Then a layer 100x60
+#  And finally a layer 60x6, giving 6 output states.
+#  Alanine tripeptide's ramachandran plot shows 6 distinct metastable states.
+#  See validation loss below the training/validation graph
+#
+#
 #  try changing learning rate
-#  i want validaiton loss close to number of output states within a couple of percent
 #  add horozontal line to validation chart to show max score (n_states)
 
 # %%
@@ -73,14 +83,11 @@ cb.set_label('# of frames in bin')
 
 
 # %% [markdown]
-#  The following function splits up each trajectory in data into pairs (X_t, X_t+lagtime) and then puts all pairs from each trajectory into a single generator.
+#  The following function splits up the trajectory `data_coords` into pairs (X_t, X_t+lagtime) and then puts all pairs from the trajectory into a single generator.
 # 
 #  So for lagtime = 1:
-#   - There are three trajectories.
-#   - Each trajectory is 250000 x 30 (30 being the number of coordinates)
-#   - So there are 249999 time lagged pairs for each trajectory.
-#   - in total then there are 749997 time-lagged pairs.
-#   - The dataset will have length 749997, each item will be a tuple of length 2 (Xt, Xt+1), and each tuple item will have length 30
+#   - The trajectory data is shape (x, 60), x is the length of the traj (sampled every ps) and 60 being the number of coordinates
+#   - The dataset will have length x-1, each item will be a tuple of length 2 (Xt, Xt+1), and each tuple item will have length 60
 # 
 
 # %%
